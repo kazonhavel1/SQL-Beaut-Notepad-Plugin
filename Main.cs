@@ -42,7 +42,7 @@ namespace Kbg.NppPluginNET
             iniFilePath = Path.Combine(iniFilePath, PluginName + ".ini");
             someSetting = (Win32.GetPrivateProfileInt("SomeSection", "SomeKey", 0, iniFilePath) != 0);
 
-            PluginBase.SetCommand(0, "MyCommand", indentaSql, new ShortcutKey(false, false, false, Keys.F10));
+            PluginBase.SetCommand(0, "Formata SQL", indentaSql, new ShortcutKey(false, false, false, Keys.F10));
         }
 
        
