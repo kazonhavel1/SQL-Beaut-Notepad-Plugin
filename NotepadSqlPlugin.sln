@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34221.43
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyNppPlugin1", "MyNppPlugin1.csproj", "{8D6B9F12-F6D8-43A3-8194-AB8ADD7415B3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotepadSqlPlugin", "NotepadSqlPlugin.csproj", "{8D6B9F12-F6D8-43A3-8194-AB8ADD7415B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
