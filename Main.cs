@@ -8,6 +8,7 @@ using static System.Net.Mime.MediaTypeNames;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Collections.ObjectModel;
 
 namespace Kbg.NppPluginNET
 {
@@ -43,9 +44,10 @@ namespace Kbg.NppPluginNET
             someSetting = (Win32.GetPrivateProfileInt("SomeSection", "SomeKey", 0, iniFilePath) != 0);
 
             PluginBase.SetCommand(0, "Formata SQL", indentaSql, new ShortcutKey(false, false, false, Keys.F10));
+            PluginBase.SetCommand(0, "Quebra de linha", quebraLinha, new ShortcutKey(false, false, false, Keys.F9));
         }
 
-       
+
         private static IntPtr ObterHandleJanela()  // Obter o handle (ID) da janela atual
         {
             IntPtr janela = PluginBase.nppData._nppHandle;
@@ -55,7 +57,7 @@ namespace Kbg.NppPluginNET
             // Validar se a janela está dividida se sim ela traz a tela secundaria, senão traz a principal
         }
 
-        
+
 
         public static string BuscaTextoJanela() // Selecionar texto dentro da janela
         {
@@ -92,15 +94,15 @@ namespace Kbg.NppPluginNET
             try
             {
                 if (string.IsNullOrEmpty(texto)) // se a janela estiver vazia não enviar a RQ
-                { 
-                   var retorno = "Não foi possível efetuar o processo pois essa janela está vazia!";
-                   MessageBox.Show(retorno);
+                {
+                    var retorno = "Não foi possível efetuar o processo pois essa janela está vazia!";
+                    MessageBox.Show(retorno);
                 }
                 else
-                {   
-                   if(texto.ToUpper().Contains("SELECT") == true) //Enviar a Requisiçao somente se houver "Select" em meio a string da janela
+                {
+                    if (texto.ToUpper().Contains("SELECT") == true || texto.ToUpper().Contains("UPDATE") || texto.ToUpper().Contains("INSERT") || texto.ToUpper().Contains("CREATE")) //Enviar a Requisiçao somente se houver "Select","Update","Create" ou "INSERT" em meio a string da janela
                     {
-                        
+
                         var retorno = await Request.enviaRequisicao(texto); //envia a string para a API
                         substituiTexto(retorno);
 
@@ -113,7 +115,7 @@ namespace Kbg.NppPluginNET
                     }
                 }
 
-                
+
             }
             catch (Exception e)
             {
@@ -123,6 +125,55 @@ namespace Kbg.NppPluginNET
 
         }
 
+
+        static void quebraLinha()
+        {
+            string texto = BuscaTextoJanela();
+            
+            if (string.IsNullOrEmpty(texto))
+            {
+                MessageBox.Show("Não é possível executar a função, pois essa janela está vazia.");
+                return;
+            }
+            
+            var utf8 = Encoding.UTF8;
+            byte[] utfBytes = utf8.GetBytes(texto);
+            texto = utf8.GetString(utfBytes, 0, utfBytes.Length);
+
+            InputForm delimitador = new InputForm();
+
+            if (delimitador.ShowDialog() == DialogResult.OK)
+            {
+                if (string.IsNullOrEmpty(delimitador.UserInput))
+                {
+                    MessageBox.Show("O delimitador não pode estar em branco, tente novamente.");
+                }
+                else
+                {
+                    if (texto.Contains(delimitador.UserInput) == true)
+                    {
+
+                        try
+                        {
+                            string newTexto = texto.Replace(delimitador.UserInput, "\n");
+                            var jsontxt = "{result: " + $"'{newTexto}'" + "}";
+                            substituiTexto(jsontxt);
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show($"Erro ao efetuar o processo: {e.ToString()}");
+                        }
+
+                    }
+                    else
+                    {
+                        MessageBox.Show("Delimitador não encontrado no texto atual, tente novamente.");
+                    }
+
+                }
+            }
+
+        }
 
         static void substituiTexto(string consulta)
         {
@@ -139,12 +190,12 @@ namespace Kbg.NppPluginNET
             GCHandle handleTexto = GCHandle.Alloc(textoBytes, GCHandleType.Pinned);
             IntPtr textoPtr = handleTexto.AddrOfPinnedObject();
 
-           
+
             Win32.SendMessage(janela_handle, (uint)SciMsg.SCI_ADDTEXT, new IntPtr(resultado.Length), textoPtr);  // Altera o texto na janela pro resultado
 
 
             handleTexto.Free(); // Liberar o buffer de texto     
-            
+
         }
 
 
