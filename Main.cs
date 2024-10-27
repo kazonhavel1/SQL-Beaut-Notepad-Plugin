@@ -129,13 +129,13 @@ namespace Kbg.NppPluginNET
         static void quebraLinha()
         {
             string texto = BuscaTextoJanela();
-            
+
             if (string.IsNullOrEmpty(texto))
             {
                 MessageBox.Show("Não é possível executar a função, pois essa janela está vazia.");
                 return;
             }
-            
+
             var utf8 = Encoding.UTF8;
             byte[] utfBytes = utf8.GetBytes(texto);
             texto = utf8.GetString(utfBytes, 0, utfBytes.Length);
@@ -144,13 +144,13 @@ namespace Kbg.NppPluginNET
 
             if (delimitador.ShowDialog() == DialogResult.OK)
             {
-                if (string.IsNullOrEmpty(delimitador.UserInput))
+                if (string.IsNullOrEmpty(delimitador.UserInput) || delimitador.validaCheckBoxVazia())
                 {
-                    MessageBox.Show("O delimitador não pode estar em branco, tente novamente.");
+                    MessageBox.Show("O delimitador ou função não podem estar em branco, tente novamente.");
                 }
                 else
                 {
-                    if (texto.Contains(delimitador.UserInput) == true)
+                    if (texto.Contains(delimitador.UserInput) == true & delimitador.checkBoxInserir.Checked)
                     {
 
                         try
@@ -164,6 +164,19 @@ namespace Kbg.NppPluginNET
                             MessageBox.Show($"Erro ao efetuar o processo: {e.ToString()}");
                         }
 
+                    }
+                    else if (texto.Contains("\n") == true & delimitador.checkBoxRemover.Checked)
+                    {
+                        try
+                        {
+                            string newTexto = texto.Replace("\n", delimitador.UserInput);
+                            var jsontxt = "{result: " + $"'{newTexto}'" + "}";
+                            substituiTexto(jsontxt);
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show($"Erro ao efetuar o processo: {e.ToString()}");
+                        }
                     }
                     else
                     {
